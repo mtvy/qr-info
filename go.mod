@@ -1,4 +1,4 @@
-module github.com/mtvy/person-qr-info
+module github.com/mtvy/qr-info
 
 go 1.18
 

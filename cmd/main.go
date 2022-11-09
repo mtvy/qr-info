@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/mtvy/person-qr-info/internal/app"
+	"github.com/mtvy/qr-info/internal/app"
 )
 
 func main() {

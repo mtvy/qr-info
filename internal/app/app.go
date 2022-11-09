@@ -1,7 +1,7 @@
 package app
 
 import (
-	"github.com/mtvy/person-qr-info/internal/service"
+	"github.com/mtvy/qr-info/internal/service"
 )
 
 func GetQrMetaInfo() string {
