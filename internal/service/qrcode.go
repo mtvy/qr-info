@@ -31,7 +31,7 @@ type QStatus struct {
 }
 
 type ProcQRCode interface {
-	GenQRCode()
+	GenQRCodeBytes()
 	GenQRCodeImg()
 	IsValid()
 }
@@ -40,10 +40,6 @@ type QRCode struct {
 	MetaData
 	FileData
 	QStatus
-}
-
-type Vertex struct {
-	Lat, Long float64
 }
 
 const (
@@ -109,7 +105,12 @@ func (qrcode *QRCode) GenQRCodeImg() status_t {
 		return qrcode.clearQRcode(err, fmt.Println)
 	}
 
-	qrcode.folder = "qrcodes/"
+	qrcode.folder = "assets/qrcodes/" + qrcode.code_id
+	err = os.Mkdir(qrcode.folder, 0777)
+	if err != nil {
+		return qrcode.clearQRcode(err, fmt.Println)
+	}
+
 	qrcode.name = qrcode.code_id + ".png"
 	qrcode.path = qrcode.folder + qrcode.name
 
@@ -126,7 +127,7 @@ func (qrcode *QRCode) GenQRCodeImg() status_t {
 	return qrcode.status
 }
 
-func (qrcode *QRCode) GenQRCode() status_t {
+func (qrcode *QRCode) GenQRCodeBytes() status_t {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 

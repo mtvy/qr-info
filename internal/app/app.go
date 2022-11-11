@@ -11,7 +11,7 @@ func GetQrMetaInfo() string {
 func InitQRCode() service.QRCode {
 	qr := service.QRCode{}
 
-	qr.GenQRCode()
+	qr.GenQRCodeBytes()
 
 	qr.GenQRCodeImg()
 
