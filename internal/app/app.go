@@ -4,14 +4,10 @@ import (
 	"github.com/mtvy/qr-info/internal/service"
 )
 
-func GetQrMetaInfo() string {
-	return "[META_DATA]"
-}
-
-func InitQRCode() service.QRCode {
+func InitQRCode(host string) service.QRCode {
 	qr := service.QRCode{}
 
-	qr.GenQRCodeBytes()
+	qr.GenQRCodeBytes(host)
 
 	qr.GenQRCodeImg()
 

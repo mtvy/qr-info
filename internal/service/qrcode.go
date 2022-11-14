@@ -13,6 +13,7 @@ import (
 )
 
 type status_t bool
+type stream_t func(...any) (int, error)
 
 type MetaData struct {
 	url     string
@@ -34,6 +35,7 @@ type ProcQRCode interface {
 	GenQRCodeBytes()
 	GenQRCodeImg()
 	IsValid()
+	SaveQRCode()
 }
 
 type QRCode struct {
@@ -46,10 +48,6 @@ const (
 	SYMBS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	WORDS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	NUMS  = "0123456789"
-)
-
-const (
-	HOST = "rutubeto.ru"
 )
 
 func randStr(strSize int, dict string) string {
@@ -76,8 +74,6 @@ func (qrcode *QRCode) IsValid() status_t {
 	}
 	return qrcode.status
 }
-
-type stream_t func(...any) (int, error)
 
 func (qrcode *QRCode) clearQRcode(err error, out stream_t) status_t {
 
@@ -106,34 +102,33 @@ func (qrcode *QRCode) GenQRCodeImg() status_t {
 	}
 
 	qrcode.folder = "assets/qrcodes/" + qrcode.code_id
-	err = os.Mkdir(qrcode.folder, 0777)
-	if err != nil {
+
+	if err = os.Mkdir(qrcode.folder, 0777); err != nil {
 		return qrcode.clearQRcode(err, fmt.Println)
 	}
 
 	qrcode.name = qrcode.code_id + ".png"
-	qrcode.path = qrcode.folder + qrcode.name
+	qrcode.path = qrcode.folder + "/" + qrcode.name
 
 	out, err := os.Create(qrcode.path)
 	if err != nil {
 		return qrcode.clearQRcode(err, fmt.Println)
 	}
 
-	err = png.Encode(out, img)
-	if err != nil {
+	if err = png.Encode(out, img); err != nil {
 		return qrcode.clearQRcode(err, fmt.Println)
 	}
 
 	return qrcode.status
 }
 
-func (qrcode *QRCode) GenQRCodeBytes() status_t {
+func (qrcode *QRCode) GenQRCodeBytes(host string) status_t {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	qrcode.code_id = randStr(8, SYMBS)
 
-	qrcode.url = HOST + "/?code=" + qrcode.code_id
+	qrcode.url = host + "/?code=" + qrcode.code_id
 
 	code, err := qr.Encode(qrcode.url, qr.H)
 	if err != nil {
@@ -144,5 +139,10 @@ func (qrcode *QRCode) GenQRCodeBytes() status_t {
 	qrcode.img_b = code.PNG()
 
 	qrcode.status = true
+	return qrcode.status
+}
+
+func (qrcode *QRCode) SaveQRCode() status_t {
+
 	return qrcode.status
 }

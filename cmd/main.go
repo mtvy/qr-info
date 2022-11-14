@@ -1,13 +1,17 @@
 package main
 
 import (
-	"fmt"
+	"os"
 
+	"github.com/joho/godotenv"
 	"github.com/mtvy/qr-info/internal/app"
 )
 
 func main() {
-	qr_meta_data := app.GetQrMetaInfo()
-	fmt.Println(qr_meta_data)
-	app.InitQRCode()
+
+	if err := godotenv.Load("./.env"); err != nil {
+		return
+	}
+
+	app.InitQRCode(os.Getenv("HOST"))
 }
