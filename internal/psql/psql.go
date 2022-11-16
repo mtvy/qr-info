@@ -10,7 +10,7 @@ import (
 
 const (
 	INSERT = "INSERT INTO qrcodes_tb (url, code_id, folder, name, path, img_b) VALUES($1, $2, $3, $4, $5, $6)"
-	DELETE = "DELETE FROM qrcodes_tb WHERE code_id ='$1'"
+	DELETE = "DELETE FROM qrcodes_tb WHERE code_id =$1"
 )
 
 func createCon() *pgxpool.Pool {
@@ -30,7 +30,7 @@ func dbReq(msg string, args ...any) bool {
 
 	dbPool := createCon()
 
-	_, err := dbPool.Query(context.Background(), INSERT, args...)
+	_, err := dbPool.Query(context.Background(), msg, args...)
 	if err != nil {
 		fmt.Println(err)
 		return false
@@ -40,9 +40,9 @@ func dbReq(msg string, args ...any) bool {
 }
 
 func Insert(args ...any) bool {
-	return dbReq(INSERT, args)
+	return dbReq(INSERT, args...)
 }
 
-func Delete(code_id string) bool {
-	return dbReq(DELETE, code_id)
+func Delete(args ...any) bool {
+	return dbReq(DELETE, args...)
 }

@@ -148,10 +148,8 @@ func (qrcode *QRCode) SaveQRCode() bool {
 }
 
 func (qrcode *QRCode) RmvQRCode() bool {
-
-	if os.RemoveAll("") != nil {
+	if os.RemoveAll("./assets/qrcodes/"+qrcode.Code_id) != nil {
 		return false
 	}
-
 	return psql.Delete(qrcode.Code_id)
 }

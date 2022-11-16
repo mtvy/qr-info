@@ -1,6 +1,7 @@
 
 CONT_FLDR=deployments
 BUILD_FILE=main
+TESTS_FILE=test
 
 
 info:
@@ -23,6 +24,9 @@ go-run:
 
 go-build:
 	cd cmd && go build -o $(BUILD_FILE) . && cd ..
+
+go-test:
+	cd test && go build -o $(TESTS_FILE) . && cd ..
 	
 enter:
 	docker exec -it $(CONT) bash
