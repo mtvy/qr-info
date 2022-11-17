@@ -9,7 +9,7 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/mtvy/qr-info/internal/psql"
+	"github.com/mtvy/qr-info/internal/service/psql"
 	"rsc.io/qr"
 )
 

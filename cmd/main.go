@@ -13,5 +13,8 @@ func main() {
 		return
 	}
 
+	app.InitServer(":8080")
+
 	app.InitQRCode(os.Getenv("HOST"))
+
 }

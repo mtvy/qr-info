@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/mtvy/qr-info/internal/qrcode"
+	"github.com/mtvy/qr-info/internal/service/qrcode"
 )
 
 func UnitTest(host string) {

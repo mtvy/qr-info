@@ -3,6 +3,7 @@ CONT_FLDR=deployments
 BUILD_FILE=main
 TESTS_FILE=test
 
+COMMIT=save_changes
 
 info:
 	docker ps -a
@@ -30,3 +31,8 @@ go-test:
 	
 enter:
 	docker exec -it $(CONT) bash
+
+git-push:
+	git add .
+	git commit -m "$(COMMIT)"
+	git push

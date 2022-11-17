@@ -2,8 +2,10 @@ package app
 
 import (
 	"fmt"
+	"net/http"
 
-	"github.com/mtvy/qr-info/internal/qrcode"
+	"github.com/mtvy/qr-info/internal/service/qrcode"
+	"github.com/mtvy/qr-info/internal/service/server"
 )
 
 func InitQRCode(host string) qrcode.QRCode {
@@ -17,7 +19,19 @@ func InitQRCode(host string) qrcode.QRCode {
 
 	fmt.Println(qr.Code_id)
 
-	qr.RmvQRCode()
-
 	return qr
+}
+
+func InitServer(host string) bool {
+
+	http.HandleFunc("/view/", server.MakeHandler(server.ViewHandler))
+	http.HandleFunc("/edit/", server.MakeHandler(server.EditHandler))
+	http.HandleFunc("/save/", server.MakeHandler(server.SaveHandler))
+	http.HandleFunc("/cls/", server.ClsHandler)
+
+	if http.ListenAndServe(host, nil) != nil {
+		return false
+	}
+
+	return true
 }
