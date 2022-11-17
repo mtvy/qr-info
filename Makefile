@@ -28,6 +28,7 @@ go-build:
 
 go-test:
 	cd test && go build -o $(TESTS_FILE) . && cd ..
+	test/test
 	
 enter:
 	docker exec -it $(CONT) bash

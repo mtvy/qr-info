@@ -1,0 +1,7 @@
+<h1>Enter Link</h1>
+
+<form action="/save/{{.Title}}" method="POST">
+<div><textarea name="body" rows="10" cols="80">{{printf "%s" .Login}}</textarea></div>
+<div><textarea name="body" rows="10" cols="80">{{printf "%s" .Body}}</textarea></div>
+<div><input type="submit" value="Save"></div>
+</form>

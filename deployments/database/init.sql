@@ -8,5 +8,6 @@ CREATE TABLE IF NOT EXISTS qrcodes_tb (
   folder  VARCHAR(32),
   name    VARCHAR(12),
   path    VARCHAR(48),
+  initer  VARCHAR(48),
   img_b   bytea
 );

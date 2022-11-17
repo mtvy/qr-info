@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	"github.com/joho/godotenv"
 	"github.com/mtvy/qr-info/internal/app"
 )
@@ -14,7 +12,4 @@ func main() {
 	}
 
 	app.InitServer(":8080")
-
-	app.InitQRCode(os.Getenv("HOST"))
-
 }

@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	INSERT = "INSERT INTO qrcodes_tb (url, code_id, folder, name, path, img_b) VALUES($1, $2, $3, $4, $5, $6)"
-	DELETE = "DELETE FROM qrcodes_tb WHERE code_id =$1"
+	INSERT = "INSERT INTO qrcodes_tb (url, code_id, folder, name, path, initer, img_b) VALUES($1, $2, $3, $4, $5, $6, $7)"
+	DELETE = "DELETE FROM qrcodes_tb WHERE code_id=$1"
+	GET    = "SELECT img_b FROM qrcodes_tb WHERE initer=$1"
 )
 
 func createCon() *pgxpool.Pool {
@@ -26,23 +27,27 @@ func createCon() *pgxpool.Pool {
 	return dbPool
 }
 
-func dbReq(msg string, args ...any) bool {
+func dbReq(msg string, args ...any) ([]interface{}, error) {
 
 	dbPool := createCon()
 
-	_, err := dbPool.Query(context.Background(), msg, args...)
-	if err != nil {
-		fmt.Println(err)
-		return false
+	rows, err := dbPool.Query(context.Background(), msg, args...)
+
+	if rows.Next() {
+		return rows.Values()
 	}
 
-	return true
+	return nil, err
 }
 
-func Insert(args ...any) bool {
+func Insert(args ...any) ([]interface{}, error) {
 	return dbReq(INSERT, args...)
 }
 
-func Delete(args ...any) bool {
+func Delete(args ...any) ([]interface{}, error) {
 	return dbReq(DELETE, args...)
+}
+
+func Get(args ...any) ([]interface{}, error) {
+	return dbReq(GET, args...)
 }

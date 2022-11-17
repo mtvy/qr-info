@@ -18,6 +18,7 @@ type stream_t func(...any) (int, error)
 type MetaData struct {
 	Url     string
 	Code_id string
+	Initer  string
 }
 
 type FileData struct {
@@ -123,9 +124,11 @@ func (qrcode *QRCode) GenQRCodeImg() bool {
 	return qrcode.Status
 }
 
-func (qrcode *QRCode) GenQRCodeBytes(host string) bool {
+func (qrcode *QRCode) GenQRCodeBytes(host string, initer string) bool {
 
 	runtime.GOMAXPROCS(runtime.NumCPU())
+
+	qrcode.Initer = initer
 
 	qrcode.Code_id = randStr(8, SYMBS)
 
@@ -143,13 +146,17 @@ func (qrcode *QRCode) GenQRCodeBytes(host string) bool {
 	return qrcode.Status
 }
 
-func (qrcode *QRCode) SaveQRCode() bool {
-	return psql.Insert(qrcode.Url, qrcode.Code_id, qrcode.Folder, qrcode.Name, qrcode.Path, qrcode.Img_b)
+func (qrcode *QRCode) SaveQRCode() ([]interface{}, error) {
+	return psql.Insert(qrcode.Url, qrcode.Code_id, qrcode.Folder, qrcode.Name, qrcode.Path, qrcode.Initer, qrcode.Img_b)
 }
 
-func (qrcode *QRCode) RmvQRCode() bool {
+func (qrcode *QRCode) GetQRCode() ([]interface{}, error) {
+	return psql.Get(qrcode.Code_id)
+}
+
+func (qrcode *QRCode) RmvQRCode() ([]interface{}, error) {
 	if os.RemoveAll("./assets/qrcodes/"+qrcode.Code_id) != nil {
-		return false
+		return nil, nil
 	}
 	return psql.Delete(qrcode.Code_id)
 }

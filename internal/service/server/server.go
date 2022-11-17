@@ -1,85 +1,110 @@
 package server
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"os"
-	"regexp"
-	"text/template"
+
+	"github.com/mtvy/qr-info/internal/service/psql"
+	"github.com/mtvy/qr-info/internal/service/qrcode"
 )
 
-type Page struct {
-	Title string
-	Body  []byte
+type RespQRCodeInit struct {
+	Code_id string `json:"code_id"`
+	Initer  string `json:"initer"`
+	Err     string `json:"error"`
+}
+
+type RespQRCodeShow struct {
+	Initer string        `json:"initer"`
+	Img_b  []interface{} `json:"img_b"`
+	Err    string        `json:"error"`
 }
 
 const (
-	DATA = "web/data/"
-	TMPL = "web/tmpl/"
+	INITER_LEN = 1
+	URL_LEN    = 3
 )
 
-var templates = template.Must(template.ParseFiles(TMPL+"edit.html", TMPL+"view.html"))
-var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
+func MakeRequest(req_url string) string {
+	resp, err := http.Get(req_url)
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", p)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return ""
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return ""
+	}
+
+	return string(body)
+}
+
+func RespQRCodeJson(w http.ResponseWriter, r *http.Request, qr_resp any) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(qr_resp)
+}
+
+func InitHandler(w http.ResponseWriter, r *http.Request) {
+
+	qr := qrcode.QRCode{}
+	url := r.URL.Query()["url"]
+	initer := r.URL.Query()["initer"]
+
+	if len(initer)*len(url) > 0 && len(initer[0]) > INITER_LEN && len(url[0]) > URL_LEN {
+
+		qr.GenQRCodeBytes(url[0], initer[0])
+
+		qr.SaveQRCode()
+
+		RespQRCodeJson(w, r, RespQRCodeInit{
+			Code_id: qr.Code_id,
+			Initer:  qr.Initer,
+		})
+
+	} else {
+		RespQRCodeJson(w, r, RespQRCodeInit{
+			Err: "Request should contain 'url' and 'initer'",
+		})
 	}
 }
 
-func (p *Page) save() error {
-	filename := DATA + p.Title + ".txt"
-	return os.WriteFile(filename, p.Body, 0600)
-}
+func ShowHandler(w http.ResponseWriter, r *http.Request) {
 
-func loadPage(title string) (*Page, error) {
-	filename := DATA + title + ".txt"
-	body, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, err
-	}
-	return &Page{Title: title, Body: body}, nil
-}
+	initer := r.URL.Query()["initer"]
 
-func ViewHandler(w http.ResponseWriter, r *http.Request, title string) {
-	p, err := loadPage(title)
-	if err != nil {
-		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
-		return
-	}
-	renderTemplate(w, "view", p)
-}
-
-func EditHandler(w http.ResponseWriter, r *http.Request, title string) {
-	p, err := loadPage(title)
-	if err != nil {
-		p = &Page{Title: title}
-	}
-	renderTemplate(w, "edit", p)
-}
-
-func SaveHandler(w http.ResponseWriter, r *http.Request, title string) {
-	body := r.FormValue("body")
-	p := &Page{Title: title, Body: []byte(body)}
-	err := p.save()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	http.Redirect(w, r, "/view/"+title, http.StatusFound)
-}
-
-func MakeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		m := validPath.FindStringSubmatch(r.URL.Path)
-		if m == nil {
-			http.NotFound(w, r)
-			return
+	if len(initer) > 0 && len(initer[0]) > INITER_LEN {
+		rows, err := psql.Get(initer[0])
+		if err != nil {
+			RespQRCodeJson(w, r, RespQRCodeShow{
+				Initer: initer[0],
+				Err:    err.Error(),
+			})
+		} else {
+			RespQRCodeJson(w, r, RespQRCodeShow{
+				Initer: initer[0],
+				Img_b:  rows,
+			})
 		}
-		fn(w, r, m[2])
+
+	} else {
+		RespQRCodeJson(w, r, RespQRCodeShow{
+			Err: "Request should contain 'initer'",
+		})
 	}
 }
 
-func ClsHandler(w http.ResponseWriter, r *http.Request) {
+func InitHandlers(host string) {
+
+	http.HandleFunc("/init", InitHandler)
+	http.HandleFunc("/show", ShowHandler)
+
+	http.ListenAndServe(host, nil)
+}
+
+func ClsHandler() {
+
 	os.Exit(1)
 }

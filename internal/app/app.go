@@ -11,7 +11,7 @@ import (
 func InitQRCode(host string) qrcode.QRCode {
 	qr := qrcode.QRCode{}
 
-	qr.GenQRCodeBytes(host)
+	qr.GenQRCodeBytes(host, "Mtvy")
 
 	qr.GenQRCodeImg()
 
@@ -22,16 +22,9 @@ func InitQRCode(host string) qrcode.QRCode {
 	return qr
 }
 
-func InitServer(host string) bool {
+func InitServer(host string) {
 
-	http.HandleFunc("/view/", server.MakeHandler(server.ViewHandler))
-	http.HandleFunc("/edit/", server.MakeHandler(server.EditHandler))
-	http.HandleFunc("/save/", server.MakeHandler(server.SaveHandler))
-	http.HandleFunc("/cls/", server.ClsHandler)
+	http.HandleFunc("/load/", server.InitHandler)
 
-	if http.ListenAndServe(host, nil) != nil {
-		return false
-	}
-
-	return true
+	http.ListenAndServe(host, nil)
 }

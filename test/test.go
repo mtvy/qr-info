@@ -5,6 +5,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/mtvy/qr-info/test/qrcode"
+	"github.com/mtvy/qr-info/test/server"
 )
 
 func main() {
@@ -14,4 +15,7 @@ func main() {
 	}
 
 	qrcode.UnitTest(os.Getenv("HOST"))
+
+	server.UnitTest("http://localhost:8080/", ":8080")
+
 }
