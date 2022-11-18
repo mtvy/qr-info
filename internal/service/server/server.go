@@ -22,9 +22,16 @@ type RespQRCodeShow struct {
 	Err    string        `json:"error"`
 }
 
+type RespQRCodeDel struct {
+	Initer string `json:"initer"`
+	Status string `json:"status"`
+	Err    string `json:"error"`
+}
+
 const (
-	INITER_LEN = 1
-	URL_LEN    = 3
+	MIN_PARAMS_LEN int = 0
+	INITER_LEN         = 1
+	URL_LEN            = 3
 )
 
 func MakeRequest(req_url string) string {
@@ -53,7 +60,7 @@ func InitHandler(w http.ResponseWriter, r *http.Request) {
 	url := r.URL.Query()["url"]
 	initer := r.URL.Query()["initer"]
 
-	if len(initer)*len(url) > 0 && len(initer[0]) > INITER_LEN && len(url[0]) > URL_LEN {
+	if len(initer)*len(url) > MIN_PARAMS_LEN && len(initer[0]) > INITER_LEN && len(url[0]) > URL_LEN {
 
 		qr.GenQRCodeBytes(url[0], initer[0])
 
@@ -96,10 +103,36 @@ func ShowHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func DelHandler(w http.ResponseWriter, r *http.Request) {
+	initer := r.URL.Query()["initer"]
+
+	if len(initer) > 0 && len(initer[0]) > INITER_LEN {
+		_, err := psql.Delete(initer[0])
+		if err != nil {
+			RespQRCodeJson(w, r, RespQRCodeDel{
+				Initer: initer[0],
+				Status: "fault",
+				Err:    err.Error(),
+			})
+		} else {
+			RespQRCodeJson(w, r, RespQRCodeDel{
+				Initer: initer[0],
+				Status: "deleted",
+			})
+		}
+
+	} else {
+		RespQRCodeJson(w, r, RespQRCodeDel{
+			Err: "Request should contain 'initer'",
+		})
+	}
+}
+
 func InitHandlers(host string) {
 
 	http.HandleFunc("/init", InitHandler)
 	http.HandleFunc("/show", ShowHandler)
+	http.HandleFunc("/del", DelHandler)
 
 	http.ListenAndServe(host, nil)
 }

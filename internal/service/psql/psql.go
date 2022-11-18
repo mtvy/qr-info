@@ -10,7 +10,7 @@ import (
 
 const (
 	INSERT = "INSERT INTO qrcodes_tb (url, code_id, folder, name, path, initer, img_b) VALUES($1, $2, $3, $4, $5, $6, $7)"
-	DELETE = "DELETE FROM qrcodes_tb WHERE code_id=$1"
+	DELETE = "DELETE FROM qrcodes_tb WHERE initer=$1"
 	GET    = "SELECT img_b FROM qrcodes_tb WHERE initer=$1"
 )
 
