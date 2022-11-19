@@ -3,6 +3,7 @@ package server
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 
@@ -32,6 +33,27 @@ const (
 	MIN_PARAMS_LEN int = 0
 	INITER_LEN         = 1
 	URL_LEN            = 3
+)
+
+const (
+	PRPL = "\033[35m"
+	YLLW = "\033[33m"
+	GRN  = "\033[32m"
+	RD   = "\033[31m"
+	BL   = "\033[36m"
+
+	FLSHNG = "\033[5m"
+	STATIC = "\033[25m"
+)
+
+const (
+	RESP_INIT_LOG = "\n%s├──>[%sRespQRCodeInit%s][%sINITER_%s%s][%sQR_%s%s][%sTRUE%s]\n│"
+	RESP_SHOW_LOG = "\n%s├──>[%sRespQRCodeShow%s][%sINITER_%s%s][%sROWS_%d%s][%sTRUE%s]\n│"
+	RESP_DEL_LOG  = "\n%s├──>[%sRespQRCodeDel%s][%sINITER_%s%s][%sSTATUS_%s%s][%sTRUE%s]\n│"
+
+	F_RESP_INIT_LOG = "\n%s├──>[%sRespQRCodeInit%s][%sFALSE%s]\n│"
+	F_RESP_SHOW_LOG = "\n%s├──>[%sRespQRCodeShow%s][%sFALSE%s]\n│"
+	F_RESP_DEL_LOG  = "\n%s├──>[%sRespQRCodeDel%s][%sFALSE%s]\n│"
 )
 
 func MakeRequest(req_url string) string {
@@ -71,10 +93,13 @@ func InitHandler(w http.ResponseWriter, r *http.Request) {
 			Initer:  qr.Initer,
 		})
 
+		log.Printf(RESP_INIT_LOG, PRPL, YLLW, PRPL, BL, qr.Initer, PRPL, BL, qr.Code_id, PRPL, GRN, PRPL)
+
 	} else {
 		RespQRCodeJson(w, r, RespQRCodeInit{
 			Err: "Request should contain 'url' and 'initer'",
 		})
+		log.Printf(F_RESP_INIT_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 	}
 }
 
@@ -89,17 +114,20 @@ func ShowHandler(w http.ResponseWriter, r *http.Request) {
 				Initer: initer[0],
 				Err:    err.Error(),
 			})
+			log.Printf(F_RESP_SHOW_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 		} else {
 			RespQRCodeJson(w, r, RespQRCodeShow{
 				Initer: initer[0],
 				Img_b:  rows,
 			})
+			log.Printf(RESP_SHOW_LOG, PRPL, YLLW, PRPL, BL, initer[0], PRPL, BL, len(rows), PRPL, GRN, PRPL)
 		}
 
 	} else {
 		RespQRCodeJson(w, r, RespQRCodeShow{
 			Err: "Request should contain 'initer'",
 		})
+		log.Printf(F_RESP_SHOW_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 	}
 }
 
@@ -114,22 +142,24 @@ func DelHandler(w http.ResponseWriter, r *http.Request) {
 				Status: "fault",
 				Err:    err.Error(),
 			})
+			log.Printf(F_RESP_DEL_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 		} else {
 			RespQRCodeJson(w, r, RespQRCodeDel{
 				Initer: initer[0],
 				Status: "deleted",
 			})
+			log.Printf(RESP_DEL_LOG, PRPL, YLLW, PRPL, BL, initer[0], PRPL, BL, "deleted", PRPL, GRN, PRPL)
 		}
 
 	} else {
 		RespQRCodeJson(w, r, RespQRCodeDel{
 			Err: "Request should contain 'initer'",
 		})
+		log.Printf(F_RESP_DEL_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 	}
 }
 
 func InitHandlers(host string) {
-
 	http.HandleFunc("/init", InitHandler)
 	http.HandleFunc("/show", ShowHandler)
 	http.HandleFunc("/del", DelHandler)
@@ -138,6 +168,5 @@ func InitHandlers(host string) {
 }
 
 func ClsHandler() {
-
 	os.Exit(1)
 }

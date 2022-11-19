@@ -2,9 +2,6 @@ package server
 
 import (
 	"log"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/mtvy/qr-info/internal/service/server"
 )
@@ -56,11 +53,11 @@ func UnitTest(url string, host string) {
 	log.Printf("\n%s├[%sMAKE_REQ%s]["+url+SHOW1+"]\n"+res(server.MakeRequest(url+SHOW1))+"\n│", PRPL, YLLW, PRPL)
 	log.Printf("\n%s├[%sMAKE_REQ%s]["+url+SHOW2+"]\n"+res(server.MakeRequest(url+SHOW2))+"\n│", PRPL, YLLW, PRPL)
 	log.Printf("\n%s├[%sMAKE_REQ%s]["+url+DEL1+"]\n"+res(server.MakeRequest(url+DEL1))+"\n│", PRPL, YLLW, PRPL)
-	log.Printf("\n%s├[%sMAKE_REQ%s]["+url+DEL2+"]\n"+res(server.MakeRequest(url+DEL2))+"\n│", PRPL, YLLW, PRPL)
+	log.Printf("\n%s└[%sMAKE_REQ%s]["+url+DEL2+"]\n"+res(server.MakeRequest(url+DEL2))+"\n│", PRPL, YLLW, PRPL)
 
-	quit := make(chan os.Signal, 1)
+	/*quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
-	<-quit
+	<-quit*/
 
 	server.ClsHandler()
 
