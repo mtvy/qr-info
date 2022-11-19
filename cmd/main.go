@@ -24,7 +24,7 @@ const (
 
 func main() {
 
-	fmt.Printf("\n%s[%sMAIN%s]\n│\n", PRPL, YLLW, PRPL)
+	fmt.Printf("\n%s[%sMAIN%s](ctrl+c to terminate)\n│\n", PRPL, YLLW, PRPL)
 
 	if err := godotenv.Load("./.env"); err != nil {
 		return

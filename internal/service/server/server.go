@@ -54,6 +54,10 @@ const (
 	F_RESP_INIT_LOG = "\n%s├──>[%sRespQRCodeInit%s][%sFALSE%s]\n│"
 	F_RESP_SHOW_LOG = "\n%s├──>[%sRespQRCodeShow%s][%sFALSE%s]\n│"
 	F_RESP_DEL_LOG  = "\n%s├──>[%sRespQRCodeDel%s][%sFALSE%s]\n│"
+
+	E_RESP_INIT_MSG = "Request should contain 'url' and 'initer'"
+	E_RESP_SHOW_MSG = "Request should contain 'initer'"
+	E_RESP_DEL_MSG  = "Request should contain 'initer'"
 )
 
 func MakeRequest(req_url string) string {
@@ -71,7 +75,7 @@ func MakeRequest(req_url string) string {
 	return string(body)
 }
 
-func RespQRCodeJson(w http.ResponseWriter, r *http.Request, qr_resp any) {
+func respQRCodeJson(w http.ResponseWriter, r *http.Request, qr_resp any) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(qr_resp)
 }
@@ -88,7 +92,7 @@ func InitHandler(w http.ResponseWriter, r *http.Request) {
 
 		qr.SaveQRCode()
 
-		RespQRCodeJson(w, r, RespQRCodeInit{
+		respQRCodeJson(w, r, RespQRCodeInit{
 			Code_id: qr.Code_id,
 			Initer:  qr.Initer,
 		})
@@ -96,9 +100,7 @@ func InitHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf(RESP_INIT_LOG, PRPL, YLLW, PRPL, BL, qr.Initer, PRPL, BL, qr.Code_id, PRPL, GRN, PRPL)
 
 	} else {
-		RespQRCodeJson(w, r, RespQRCodeInit{
-			Err: "Request should contain 'url' and 'initer'",
-		})
+		respQRCodeJson(w, r, RespQRCodeInit{Err: E_RESP_INIT_MSG})
 		log.Printf(F_RESP_INIT_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 	}
 }
@@ -110,13 +112,13 @@ func ShowHandler(w http.ResponseWriter, r *http.Request) {
 	if len(initer) > 0 && len(initer[0]) > INITER_LEN {
 		rows, err := psql.Get(initer[0])
 		if err != nil {
-			RespQRCodeJson(w, r, RespQRCodeShow{
+			respQRCodeJson(w, r, RespQRCodeShow{
 				Initer: initer[0],
 				Err:    err.Error(),
 			})
 			log.Printf(F_RESP_SHOW_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 		} else {
-			RespQRCodeJson(w, r, RespQRCodeShow{
+			respQRCodeJson(w, r, RespQRCodeShow{
 				Initer: initer[0],
 				Img_b:  rows,
 			})
@@ -124,27 +126,26 @@ func ShowHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		RespQRCodeJson(w, r, RespQRCodeShow{
-			Err: "Request should contain 'initer'",
-		})
+		respQRCodeJson(w, r, RespQRCodeShow{Err: E_RESP_SHOW_MSG})
 		log.Printf(F_RESP_SHOW_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 	}
 }
 
 func DelHandler(w http.ResponseWriter, r *http.Request) {
+
 	initer := r.URL.Query()["initer"]
 
 	if len(initer) > 0 && len(initer[0]) > INITER_LEN {
 		_, err := psql.Delete(initer[0])
 		if err != nil {
-			RespQRCodeJson(w, r, RespQRCodeDel{
+			respQRCodeJson(w, r, RespQRCodeDel{
 				Initer: initer[0],
 				Status: "fault",
 				Err:    err.Error(),
 			})
 			log.Printf(F_RESP_DEL_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 		} else {
-			RespQRCodeJson(w, r, RespQRCodeDel{
+			respQRCodeJson(w, r, RespQRCodeDel{
 				Initer: initer[0],
 				Status: "deleted",
 			})
@@ -152,14 +153,12 @@ func DelHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 	} else {
-		RespQRCodeJson(w, r, RespQRCodeDel{
-			Err: "Request should contain 'initer'",
-		})
+		respQRCodeJson(w, r, RespQRCodeDel{Err: E_RESP_DEL_MSG})
 		log.Printf(F_RESP_DEL_LOG, PRPL, YLLW, PRPL, RD, PRPL)
 	}
 }
 
-func InitHandlers(host string) {
+func StartHandlers(host string) {
 	http.HandleFunc("/init", InitHandler)
 	http.HandleFunc("/show", ShowHandler)
 	http.HandleFunc("/del", DelHandler)

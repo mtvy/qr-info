@@ -45,7 +45,7 @@ func UnitTest(url string, host string) {
 	log.Printf("\n%s├[%sMAKE_REQ%s]["+url+"]\n"+res(server.MakeRequest(url))+"\n│", PRPL, YLLW, PRPL)
 	log.Printf("\n%s├[%sINIT_HANDLERS%s]\n│", PRPL, YLLW, PRPL)
 
-	go server.InitHandlers(host)
+	go server.StartHandlers(host)
 
 	log.Printf("\n%s├[%sMAKE_REQ%s]["+url+INIT1+"]\n"+res(server.MakeRequest(url+INIT1))+"\n│", PRPL, YLLW, PRPL)
 	log.Printf("\n%s├[%sMAKE_REQ%s]["+url+INIT2+"]\n"+res(server.MakeRequest(url+INIT2))+"\n│", PRPL, YLLW, PRPL)

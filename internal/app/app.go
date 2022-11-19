@@ -36,6 +36,6 @@ func InitQRCode(host string) qrcode.QRCode {
 func InitServer(host string) {
 
 	log.Printf("\n%s├──>[%sINIT_SERVER%s][%sHOST"+host+"%s]\n│", PRPL, YLLW, PRPL, BL, PRPL)
-	go server.InitHandlers(host)
+	go server.StartHandlers(host)
 	log.Printf("\n├──>%s[%s%sRUN_SERVER%s%s][%sHOST"+host+"%s]\n│", PRPL, FLSHNG, YLLW, STATIC, PRPL, GRN, PRPL)
 }
